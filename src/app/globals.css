@@ -1,0 +1,8 @@
+/* src/app/globals.css */
+/* アプリケーション全体で共通するレイアウト */
+
+/* Tailwind CSSの設定 */
+@config "../../tailwind.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
