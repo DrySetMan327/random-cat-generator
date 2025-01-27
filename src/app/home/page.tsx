@@ -1,27 +1,30 @@
-import { GetServerSideProps, NextPage } from "next";
-import { useState } from "react";
-import styles from "../styles/index.module.css";
+"use client";
 
-// データフェッチAPIのgetServerSidePropsから渡されるpropsの型を定義
+import { useState, useEffect } from "react";
+import styles from "./index.module.css";
+
+// サーバーコンポーネントから渡されるpropsの型を定義
 type Props = {
-    initialImageUrl: string;
+    initialImageUrl?: string;
 };
 
+// サーバーコンポーネントからデータを取得
+async function getInitialImage() {
+    const image = await fetchImage();
+    return image.url;
+};
+
+
 // ランダムな猫の画像をページ上に表示するためのページコンポーネント
-const IndexPage: NextPage<Props> = ({ initialImageUrl }) => {
+export default function HomePage() {
 
     // useStateとuseEffectを使用して画像読み込みの状態と更新操作を定義
-    const [imageUrl, setImageUrl] = useState(initialImageUrl);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // ページ初期表示時の画像取得はサーバーサイド処理で実装したため不要
-    // useEffect(() => {
-    //     fetchImage().then((newImage) => {
-    //         // 画像URLとローディング状態を更新
-    //         setImageUrl(newImage.url);
-    //         setIsLoading(false);
-    //     });
-    // }, []);
+    useEffect(() => {
+        fetchImage().then(image => setImageUrl(image.url));
+    }, []);
 
     // ボタンをクリックしたときに新しい猫の画像を読み込む関数
     const handleClick = async () => {
@@ -40,26 +43,28 @@ const IndexPage: NextPage<Props> = ({ initialImageUrl }) => {
             <button onClick={handleClick} className={styles.button}>
                 他のにゃんこも見る!!
             </button>
+            <span>Font Test Message</span>
+            <span className="font-robot">Font Test Message</span>
+            <span className="font-inter">Font Test Message</span>
             <div className={styles.frame}>
                 {isLoading ? 
                     <span className={styles.loadingMessage}>にゃんこ読み込み中...</span>
-                    : <img src={imageUrl} className={styles.img}/>
+                    : imageUrl && <img src={imageUrl} className={styles.img}/>
                 } 
             </div>
         </div>
     );
 };
-export default IndexPage;
 
-// ページ初期表示時の画を取得するサーバーサイドの処理
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-    const image = await fetchImage();
-    return {
-        props: {
-            initialImageUrl: image.url,
-        },
-    };
-};
+// ページ初期表示時の画像を取得するサーバーサイドの処理
+// export const getServerSideProps: GetServerSideProps<Props> = async () => {
+//     const image = await fetchImage();
+//     return {
+//         props: {
+//             initialImageUrl: image.url,
+//         },
+//     };
+// };
 
 // The Cat APIのレスポンスに含まれる画像情報の型を定義
 type Image = {
